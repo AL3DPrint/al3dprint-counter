@@ -18,7 +18,7 @@ jobs:
       - name: Read counter
         id: read
         run: |
-          count=$(cat counter.json | grep -o '[0-9]\+')
+          count=$(grep -o '[0-9]\+' counter.json)
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Increment counter
@@ -27,12 +27,11 @@ jobs:
           echo "{ \"visits\": $new_count }" > counter.json
 
       - name: Commit changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.FINE_GRAINED_TOKEN }}
         run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
+          git config user.name "AL3DPrint Bot"
+          git config user.email "bot@al3dprint.de"
           git add counter.json
-          git commit -m "Increment counter" || echo "No changes to commit"
-
-      - name: Push changes
-        run: |
-          git push
+          git commit -m "Increment counter" || echo "No changes"
+          git push https://AL3DPrint:${GITHUB_TOKEN}@github.com/AL3DPrint/al3dprint-counter.git

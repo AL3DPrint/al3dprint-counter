@@ -4,18 +4,21 @@ on:
   repository_dispatch:
     types: [increment-counter]
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Read counter
         id: read
         run: |
-          count=$(jq '.visits' counter.json)
+          count=$(cat counter.json | grep -o '[0-9]\+')
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Increment counter
@@ -28,5 +31,8 @@ jobs:
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
           git add counter.json
-          git commit -m "Increment counter"
+          git commit -m "Increment counter" || echo "No changes to commit"
+
+      - name: Push changes
+        run: |
           git push
